@@ -87,9 +87,10 @@ export default function TopicsList() {
               {t.completed ? <p className="com">Completed</p> : <p className="inc">Incomplete</p>}
             </div>
             <RemoveBtn id={t._id} onRemove={handleTaskRemoval} />
+            {!t.completed && (
             <Link href={`/editTopic/${t._id}`}>
               <HiPencilAlt size={24} />
-            </Link>
+            </Link>)}
           </div>
         </div>
       ))}
