@@ -2,3 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+.completed {
+    background-color: #f0f8ff; /* Light blue background for completed tasks */
+  }
+  
+  .status {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #666;
+    margin-right: 10px;
+  }
+  .check {
+    width: 18px;
+    height: 18px;
+    margin-right: 20px;
+  }
+  .desc {
+    margin-left: 2.4rem;
+  }
+
+  .com {
+    color: green;
+  }
+  .inc{
+    color: gray;
+  }
