@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import RemoveBtn from "./RemoveBtn";
@@ -20,12 +20,49 @@ const getTopics = async () => {
   }
 };
 
-export default function TopicsList() {
+export default function TopicsList({ completedTasks, setCompletedTasks }) {
   const [topics, setTopics] = useState([]);
+  const [showCompleted, setShowCompleted] = useState(false);
 
+  const getCompletedTask = () => {
+    return topics.filter((topic) => topic.completed);
+  };
 
-  const handleTaskRemoval = (idToRemove) => {
-    setTopics((prevTopics) => prevTopics.filter((topic) => topic._id !== idToRemove));
+  const handleTaskRemoval = async (idToRemove) => {
+    try {
+      await fetch(`http://localhost:3000/api/topic/${idToRemove}`, {
+        method: "DELETE",
+      });
+
+      // Filter out the deleted task
+      setTopics((prevTopics) =>
+        prevTopics.filter((topic) => topic._id !== idToRemove)
+      );
+
+      // Find the deleted task in completedTasks
+      const deletedTask = completedTasks.find(
+        (task) => task._id === idToRemove
+      );
+        
+      
+    // Send the deleted task to the completedTask API route
+    await fetch("http://localhost:3000/api/completedTask", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(deletedTask), // Assuming deletedTask holds the deleted task data
+    });
+    
+      if (deletedTask) {
+        // Remove the deleted task from completedTasks and update state
+        setCompletedTasks((prevCompletedTasks) =>
+          prevCompletedTasks.filter((task) => task._id !== idToRemove)
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleCheckboxClick = async (id, isChecked) => {
@@ -43,7 +80,9 @@ export default function TopicsList() {
       }
 
       const updatedTopics = topics.map((topicItem) =>
-        topicItem._id === id ? { ...topicItem, completed: isChecked } : topicItem
+        topicItem._id === id
+          ? { ...topicItem, completed: isChecked }
+          : topicItem
       );
 
       setTopics(updatedTopics);
@@ -82,18 +121,33 @@ export default function TopicsList() {
             </h2>
             <div className="desc">{t.description}</div>
           </div>
+
           <div className="flex gap-2">
             <div className="status">
-              {t.completed ? <p className="com">Completed</p> : <p className="inc">Incomplete</p>}
+              {t.completed ? (
+                <p className="com">Completed</p>
+              ) : (
+                <p className="inc">Incomplete</p>
+              )}
             </div>
             <RemoveBtn id={t._id} onRemove={handleTaskRemoval} />
             {!t.completed && (
-            <Link href={`/editTopic/${t._id}`}>
-              <HiPencilAlt size={24} />
-            </Link>)}
+              <Link href={`/editTopic/${t._id}`}>
+                <HiPencilAlt size={24} />
+              </Link>
+            )}
           </div>
         </div>
       ))}
+
+      <Link href="/api/completedTask">
+        <button
+          onClick={() => setShowCompleted(!showCompleted)}
+          className="bg-green-600 font-bold text-white py-3 px-6 w-fit"
+        >
+          Completed Task
+        </button>
+      </Link>
     </>
   );
 }
